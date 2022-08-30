@@ -20,7 +20,7 @@ load(FILE);
 
 %% Variables
 
-[locs] = BreathDef(CO2);
+[CPks, locs] = BreathDef(CO2);
 [HR] = heartrate(EKG);
 [Q] = COest(BP,HR); % Cardiac output from blood pressure and heart rate
 
@@ -41,7 +41,6 @@ CO2vn1 = ones([9 1]); % %, Venous partial CO2 content
 CO2an1 = ones([9 1]); % %, Arterial CO2 content
 PkCO2n = 42*ones([9 1])/9; % mmHg, Lung compartment k partial CO2 pressure
 PkCO2n1 = ones([9 1]); % mmHg, Lung compartment k partial CO2 pressure
-PETCO2n1 = ones([9 1]); % End-tidal partial CO2 pressure %change
 CO2v = ones([9 1]);
 
 [~, T] = size(locs);
@@ -50,7 +49,8 @@ PETCO2 = ones([9 T]);
 PkCO2 = zeros([9 T]);
 
 Trespn = 0; % s, Respiratory interval. See line ~124. 
-PETCO2n = 40; % mmHg, end-tidal partial CO2 pressure
+%PETCO2n = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
+%PETCO2n1 = PETCO2n; % End-tidal partial CO2 pressure
 VO2n = 62; % L/min, Pulmonary O2 Uptake
 
 SVn = 70*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath. was just 70
@@ -82,6 +82,8 @@ end
 
 %for L = 1:3
 for L = 1:T
+
+PETCO2n1 = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
 
 C = CO2vn1.*SVn; % 2
 
@@ -173,7 +175,7 @@ end
 
 
 %% finding the beginning of a breath
-function [locs] = BreathDef(CO2)
+function [CPks, locs] = BreathDef(CO2)
 
 smoothed_data = smoothdata(CO2(1,:),"movmedian",10);
 %findpeaks(smoothed_data,"MinPeakHeight",38,"MinPeakProminence",2,"MinPeakDistance",2500); % for testing the smoothing only
@@ -199,6 +201,8 @@ end
 
 twoderiv = smoothdata(twoderiv,"movmedian",5);
 [~, locs] = findpeaks(twoderiv,"MinPeakHeight",.0001,"MinPeakProminence",.002,"MinPeakDistance",90);
+
+CPks = CO2(1,locs);
 
 %{
 plot(twoderiv)
