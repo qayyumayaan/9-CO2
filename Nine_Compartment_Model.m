@@ -54,8 +54,6 @@ PETCO2 = ones([9 T]);
 PkCO2 = zeros([9 T]);
 
 Trespn = 0; % s, Respiratory interval. See line ~124. 
-%PETCO2n = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
-%PETCO2n1 = PETCO2n; % End-tidal partial CO2 pressure
 VO2n = 62; % L/min, Pulmonary O2 Uptake
 
 SVn = 70*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath. was just 70
@@ -63,7 +61,6 @@ V_Tn = 500*[4.58; 6.63; 8.48; 10.13; 11.62; 12.96; 14.17; 15.25; 16.22]/100; % m
 FRC = 3*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
 V_Cap = 75*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
 
-%SVng_k = ones([9,1]) * 550; % mL, Stroke volume per breath, per segment
 g_k = ones([9 1]);
 h_k = ones([9 1]);
 w_k = ones([9 1]);
