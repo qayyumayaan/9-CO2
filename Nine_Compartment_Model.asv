@@ -112,7 +112,7 @@ CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
 
 PkCO2n = CO2kn./c; % mmHg
 
-PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
+%PETCO2n = PkCO2n * sum(h_k); % 13, mmHg
 
 NCO2(:,L) = CO2kn(:,1);
 PkCO2(:,L) = PkCO2n(:,1);
