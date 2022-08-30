@@ -50,13 +50,13 @@ CO2v = ones([9 1]);
 [~, T] = size(locs);
 NCO2 = zeros([9 T]);
 PETCO2 = ones([9 T]);
-PkCO2 = zeros([9 T]);
+PkCO2 = zeros([9 T]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
 
-Trespn = 0; % s, Respiratory interval. See line ~124. 
-VO2n = 62; % L/min, Pulmonary O2 Uptake
+Trespn = 0; % s, Respiratory interval. See line ~129. 
+VO2n = 62; % L/min, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
 
 V_Tn = 500*[4.58; 6.63; 8.48; 10.13; 11.62; 12.96; 14.17; 15.25; 16.22]/100; % ml, Tidal volume. was just .5
-FRC = 3*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
+FRC = 3000*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
 V_Cap = 75*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
 
 g_k = ones([9 1]);
