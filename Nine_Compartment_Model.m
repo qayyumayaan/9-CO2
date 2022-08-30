@@ -23,7 +23,7 @@ load(FILE);
 
 %% Variables
 
-[CPks, locs] = BreathDef(CO2);
+[ETCO2, locs] = BreathDef(CO2);
 [HR] = heartrate(EKG);
 [CO_EST] = COest(BP,HR); % Cardiac output from blood pressure and heart rate
 
@@ -81,7 +81,7 @@ end
 %for L = 1:3
 for L = 1:T
 
-PETCO2n1 = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
+PETCO2n1 = ETCO2(1,L); % mmHg, end-tidal partial CO2 pressure
 SVn = CO_EST(1,locs(1,L)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
 C = CO2vn1.*SVn; % 2, ml * %
@@ -143,15 +143,19 @@ PkCO2 = PkCO2
 %% SBP and DBP Calculator (Liljestrand & Zander formula)
 function [CO_EST] = COest(BP,HR) 
 
-[SBPpeaks, SBPlocation] = findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
+[SBP, SBPlocation] = findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
     % findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
-SBP = sum(SBPpeaks)/size(SBPlocation,2);
 
 BP_DBP = -1 * BP;
-[DBPpeaks, DBPlocation] = findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100);
-    % findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100)
-DBP = -sum(DBPpeaks)/size(DBPlocation,2);
-PP = SBP - DBP;
+[negDBPpeaks, DBPlocation] = findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100);
+DBP=-negDBPpeaks;
+% findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100)
+
+SBPavg = sum(SBPpeaks)/size(SBPlocation,2);
+
+DBPavg = sum(DBPpeaks)/size(DBPlocation,2);
+
+PP = SBPavg - DBPavg; %Pulse Pressure
 
 CO_EST = HR * PP / (SBP + DBP);
 
