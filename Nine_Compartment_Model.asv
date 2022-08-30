@@ -85,6 +85,7 @@ end
 for L = 1:T
 
 PETCO2n1 = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
+SVn = CO_EST.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 C = CO2vn1.*SVn; % 2
 
