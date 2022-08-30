@@ -86,19 +86,19 @@ for L = 1:T
 PETCO2n1 = CPks(1,L); % mmHg, end-tidal partial CO2 pressure
 SVn = CO_EST(1,locs(1,L)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
-C = CO2vn1.*SVn; % 2
+C = CO2vn1.*SVn; % 2, ml * %
 
-A = CO2an1.*SVn; % 3
+A = CO2an1.*SVn; % 3, ml * %
 
-B = VO2n.*RQ.*(Trespn/60); % 4, est. CO2 produced per breath
+B = VO2n.*RQ.*(Trespn/60); % 4, ml, est. CO2 produced per breath
 
-CO2vn = CO2vn1 + (A + B - C) / Vv ; % 1
+CO2vn = CO2vn1 + (A + B - C) / Vv ; % 1, %
 
 D = sum(.53*(1.266-exp(-.0257*PkCO2n1))) .* times(g_k,SVn); % 6
 
-E = CO2an1.*SVn; % 7
+E = CO2an1.*SVn; % 7, ml * %
 
-CO2an = CO2an1 + (D-E)/Va; % 5
+CO2an = CO2an1 + (D-E)/Va; % 5, %
 
 F = .53*(1.266-exp(-.0257*PkCO2n1)).* w_k .* V_Cap + c .* PkCO2n1 .* w_k .* FRC + c .* PETCO2n1.* w_k.* V_D; % 8
 
@@ -108,11 +108,11 @@ a = .53*(1.266-exp(-.0257*PETCO2n1)) ./ (c * PETCO2n1); % 10
 
 b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC + h_k .* V_Tn)); % 11
 
-CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); %12
+CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
 
-PkCO2n = CO2kn./c;
+PkCO2n = CO2kn./c; % mmHg
 
-PETCO2n = PkCO2n * sum(h_k); % 13
+PETCO2n = PkCO2n * sum(h_k); % 13, mmHg
 
 NCO2(:,L) = CO2kn(:,1);
 PkCO2(:,L) = PkCO2n(:,1);
