@@ -121,9 +121,9 @@ PETCO2(:,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-%PkCO2n1 = PkCO2n;
-%CO2vn1 = CO2vn;
-%CO2an1 = CO2an;
+PkCO2n1 = PkCO2n;
+CO2vn1 = CO2vn;
+CO2an1 = CO2an;
 PETCO2n1 = PETCO2n;
 Trespn = (locs(1,L)-Trespn)/1000; % s, Respiratory interval
 
