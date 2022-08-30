@@ -11,17 +11,15 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 
 %% Importing Data
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
-load("G:\Study\9 CO2\VVA001_v3.mat");
+%load("G:\Study\9 CO2\VVA001_v3.mat");
 
-%{
 
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
 [infile,pathname] = uigetfile(filterspec,Title,"C:\Users\amazi\Downloads\Mentorship\");
 FILE = append(pathname,infile);
 load(FILE);
-
-%}
+S
 
 %% Variables
 
