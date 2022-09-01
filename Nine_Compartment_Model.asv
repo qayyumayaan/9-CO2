@@ -11,15 +11,14 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 
 %% Importing Data
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
-%load("G:\Study\9 CO2\VVA001_v3.mat");
-
-
+load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
+%{
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
 [infile,pathname] = uigetfile(filterspec,Title,"C:\Users\amazi\Downloads\Mentorship\");
 FILE = append(pathname,infile);
 load(FILE);
-
+%}
 
 %% Variables
 
@@ -28,7 +27,7 @@ load(FILE);
 [CO_EST] = COest(BP,HR); % L/min, Cardiac output from blood pressure and heart rate
 CO_EST_ml = CO_EST * 1000; % ml/min
 
-Vv = 5000; % ml, venous blood volume, from cardiac output
+Vv = 4000; % ml, venous blood volume, from cardiac output
 
 V_D = 150; % ml, Anatomical dead space
 VCO2 = 248; % ml min-1
@@ -58,7 +57,7 @@ Trespn = 0; % s, Respiratory interval. See line ~129.
 
 V_Tn = 700*[4.58; 6.63; 8.48; 10.13; 11.62; 12.96; 14.17; 15.25; 16.22]/100; % ml, Tidal volume. was just .5
 FRC = 3000*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
-V_Cap = 75*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
+V_Cap = 200*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
 
 g_k = ones([9 1]);
 h_k = ones([9 1]);
@@ -81,7 +80,7 @@ end
 
 % numbered equations
 
-SVn = (CO_EST_ml(1)./HR(1)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
+SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
 %for L = 1:3
 for L = 1:BN
@@ -112,7 +111,7 @@ b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC 
 
 CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
 
-PkCO2n = CO2kn./c; % mmHg
+PkCO2n = CO2kn.*c; % mmHg
 
 PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
 
@@ -124,20 +123,20 @@ PETCO2(:,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-PkCO2n1 = PkCO2n
+PkCO2n./PkCO2n1
+PkCO2n1 = PkCO2n;
 CO2vn1 = CO2vn;
 CO2an1 = CO2an;
-
-
+ 
 
 Trespn = (locs(1,L)-Trespn)/1000; % s, Respiratory interval
 
 end
 disp("Finished.")
-PkCO2;
-%CO2v = CO2v
-%CO2a = CO2a
-%PETCO2 = PETCO2
+PkCO2
+%CO2v 
+%CO2a 
+%PETCO2
 
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.

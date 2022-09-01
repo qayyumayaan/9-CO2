@@ -31,7 +31,7 @@ Vv = 4000; % ml, venous blood volume, from cardiac output
 
 V_D = 150; % ml, Anatomical dead space
 VCO2 = 248; % ml min-1
-VO2n = 263; % ml min^-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
+VO2n = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
 RQ = .9; % Respiratory quotient, taken from paper. VCO2/VO2
 Va = 1300; % ml, Arterial blood volume
 c = .1316; %/mmHg
@@ -46,6 +46,7 @@ CO2vn1 = ones([9 1]); % %, Venous partial CO2 content
 CO2an1 = ones([9 1]); % %, Arterial CO2 content
 PkCO2n1 = ones([9 1]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
 CO2v = ones([9 1]);
+CO2a = ones([9 1]);
 
 BN = length(locs); % # of breaths
 NCO2 = zeros([9 BN]);
@@ -111,7 +112,7 @@ b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC 
 
 CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
 
-PkCO2n = CO2kn./c; % mmHg
+PkCO2n = CO2kn.*c; % mmHg
 
 PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
 
@@ -123,20 +124,20 @@ PETCO2(:,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-PkCO2n1 = PkCO2n
+PkCO2n./PkCO2n1
+PkCO2n1 = PkCO2n;
 CO2vn1 = CO2vn;
 CO2an1 = CO2an;
-
-
+ 
 
 Trespn = (locs(1,L)-Trespn)/1000; % s, Respiratory interval
 
 end
 disp("Finished.")
-PkCO2;
-%CO2v = CO2v
-%CO2a = CO2a
-%PETCO2 = PETCO2
+PkCO2
+%CO2v 
+%CO2a 
+PETCO2
 
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
