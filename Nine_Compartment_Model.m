@@ -5,7 +5,7 @@ clc
 
 %{
 
-Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
+Written by Ayaan Qayyum 8/23/22 - 9/3/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
 
 %}
 
@@ -23,14 +23,20 @@ elseif isunix
     Platform = "UNIX";
 end
 
-
-Initials = inputdlg("Please enter your initials.");
+Initials = char(inputdlg("Please enter your initials."));
+if Initials == ""
+    return
+end
 filterspec = '*.mat';
 Title = 'Pick file generated from VVA Cleandata:';
 [infile,pathname] = uigetfile(filterspec,Title);
+if pathname == 0
+    return
+end
 FILE = append(pathname,infile);
 load(FILE);
 
+close all
 
 %% Variables
 
@@ -181,7 +187,7 @@ DBPavg = sum(DBP)/length(DBP);
 
 PPavg = SBPavg - DBPavg; % Pulse Pressure
 
-SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper.
+SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5317099/
 SV_adj = SV / 3.548;
 
 end
