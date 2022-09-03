@@ -12,7 +12,7 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %% Importing Data
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
 %load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
-
+load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 %{
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
@@ -24,9 +24,9 @@ load(FILE);
 %% Variables
 
 [ETCO2, locs] = BreathDef(CO2);
-[HR] = heartrate(EKG);
-[CO_EST] = COest(BP,HR); % L/min, Cardiac output from blood pressure and heart rate
-CO_EST_ml = CO_EST * 1000; % ml/min
+%[HR] = heartrate(ECG);
+%[CO_EST] = COest(BP,HR); % L/min, Cardiac output from blood pressure and heart rate
+%CO_EST_ml = CO_EST * 1000; % ml/min
 
 Vv = 4000; % ml, venous blood volume, from cardiac output
 
@@ -80,9 +80,9 @@ for k = 1:9
 end
 
 % numbered equations
-[SV] = SVn_est(SBP,DBP,HR); % mL, Stroke volume per breath.
+[SV_adj_ml] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
 %SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
-SVn = SV.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
+SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 %HR * PPavg / (SBPavg + DBPavg) 
 %for L = 1:3
@@ -144,19 +144,21 @@ PkCO2
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
-function [SV] = SVn_est(SBP,DBP) 
+function [SV_adj_ml] = SVn_est(SBP,DBP) 
 
-SBPavg = sum(SBP)/length(SBPlocation);
+SBPavg = sum(SBP)/length(SBP);
 
-DBPavg = sum(DBP)/length(DBPlocation);
+DBPavg = sum(DBP)/length(DBP);
 
 PPavg = SBPavg - DBPavg; % Pulse Pressure
 
-SV = 1000 / 3.548 * (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper.
+SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper.
+SV_adj = SV / 3.548;
+SV_adj_ml = SV_adj * 1000;
 
 end
 
-%% SBP and DBP Calculator (Liljestrand & Zander formula)
+%% OLD SBP and DBP Calculator (Initial Implementation of the Liljestrand & Zander formula)
 %function [CO_ADJ] = COest(DBP,SBP,HR) 
 function [CO_ADJ] = COest(BP,HR) 
 
