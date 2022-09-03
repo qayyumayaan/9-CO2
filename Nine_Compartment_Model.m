@@ -27,9 +27,8 @@ load(FILE);
 CO2Pklocs = ietCO2;
 
 Vv = 4000; % ml, venous blood volume, from cardiac output
-
 V_D = 150; % ml, Anatomical dead space
-VCO2 = 248; % ml min-1
+VCO2 = 248; % ml min-1, exhaled volume of CO2
 VO2n = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
 RQ = .9; % Respiratory quotient, taken from paper. VCO2/VO2
 Va = 1300; % ml, Arterial blood volume
@@ -84,7 +83,7 @@ SV_adj_ml = SV_adj * 1000;
 SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 %HR * PPavg / (SBPavg + DBPavg) 
-%for L = 1:3
+%for L = 1:3 % only for testing the first few breaths
 for L = 1:BN
 
 PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
