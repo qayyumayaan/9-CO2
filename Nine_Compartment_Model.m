@@ -49,7 +49,7 @@ CO2a = ones([9 1]);
 
 BN = length(CO2Pklocs); % # of breaths
 NCO2 = zeros([9 BN]);
-PETCO2 = ones([9 BN]);
+PETCO2 = ones([1 BN]);
 PkCO2 = zeros([9 BN]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
 
 Trespn = 0; % s, Respiratory interval. See line ~129. 
@@ -121,7 +121,7 @@ NCO2(:,L) = CO2kn(:,1);
 PkCO2(:,L) = PkCO2n(:,1);
 CO2v(:,L) = CO2vn(:,1);
 CO2a(:,L) = CO2an(:,1);
-PETCO2(:,L) = PETCO2n(:,1);
+PETCO2(1,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
