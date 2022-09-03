@@ -12,7 +12,8 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %% Importing Data
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
 %load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
-load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+%load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 %{
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
