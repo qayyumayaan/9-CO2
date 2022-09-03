@@ -13,12 +13,13 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
 %load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
 
+%{
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
 [infile,pathname] = uigetfile(filterspec,Title,"C:\Users\amazi\Downloads\Mentorship\");
 FILE = append(pathname,infile);
 load(FILE);
-
+%}
 
 %% Variables
 
@@ -55,7 +56,6 @@ PkCO2 = zeros([9 BN]); % mmHg, Lung compartment k partial CO2 pressure. Necessar
 
 Trespn = 0; % s, Respiratory interval. See line ~129. 
 
-
 V_Tn = 700*[4.58; 6.63; 8.48; 10.13; 11.62; 12.96; 14.17; 15.25; 16.22]/100; % ml, Tidal volume. was just .5
 FRC = 3000*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
 V_Cap = 200*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
@@ -80,9 +80,11 @@ for k = 1:9
 end
 
 % numbered equations
+[SV] = SVn_est(SBP,DBP,HR); % mL, Stroke volume per breath.
+%SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
+SVn = SV.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
-SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
-
+%HR * PPavg / (SBPavg + DBPavg) 
 %for L = 1:3
 for L = 1:BN
 
@@ -124,7 +126,7 @@ PETCO2(:,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-PkCO2n./PkCO2n1
+%PkCO2n./PkCO2n1
 PkCO2n1 = PkCO2n;
 CO2vn1 = CO2vn;
 CO2an1 = CO2an;
@@ -137,13 +139,25 @@ disp("Finished.")
 PkCO2
 %CO2v 
 %CO2a 
-PETCO2
+%PETCO2
 
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
+%% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
+function [SV] = SVn_est(SBP,DBP) 
 
+SBPavg = sum(SBP)/length(SBPlocation);
+
+DBPavg = sum(DBP)/length(DBPlocation);
+
+PPavg = SBPavg - DBPavg; % Pulse Pressure
+
+SV = 1000 / 3.548 * (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper.
+
+end
 
 %% SBP and DBP Calculator (Liljestrand & Zander formula)
+%function [CO_ADJ] = COest(DBP,SBP,HR) 
 function [CO_ADJ] = COest(BP,HR) 
 
 [SBP, SBPlocation] = findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
