@@ -12,7 +12,8 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %% Importing Data
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
 %load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
-load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+%load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 %{
 filterspec = '*.mat';
 Title = 'Pick file generated from the Writing Script:';
@@ -23,7 +24,7 @@ load(FILE);
 
 %% Variables
 
-locs = ietCO2;
+CO2Pklocs = ietCO2;
 
 %[etCO2, locs] = BreathDef(CO2);
 %[HR] = heartrate(ECG);
@@ -51,7 +52,7 @@ PkCO2n1 = ones([9 1]); % mmHg, Lung compartment k partial CO2 pressure. Necessar
 CO2v = ones([9 1]);
 CO2a = ones([9 1]);
 
-BN = length(locs); % # of breaths
+BN = length(CO2Pklocs); % # of breaths
 NCO2 = zeros([9 BN]);
 PETCO2 = ones([9 BN]);
 PkCO2 = zeros([9 BN]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
@@ -128,13 +129,13 @@ PETCO2(:,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-PkCO2n./PkCO2n1
+%PkCO2n./PkCO2n1
 PkCO2n1 = PkCO2n;
 CO2vn1 = CO2vn;
 CO2an1 = CO2an;
  
 
-Trespn = (locs(1,L)-Trespn)/1000; % s, Respiratory interval
+Trespn = (CO2Pklocs(1,L)-Trespn)/1000; % s, Respiratory interval
 
 end
 disp("Finished.")
@@ -162,7 +163,7 @@ end
 
 %% OLD SBP and DBP Calculator (Initial Implementation of the Liljestrand & Zander formula)
 %function [CO_ADJ] = COest(DBP,SBP,HR) 
-function [CO_ADJ] = COest(BP,HR) 
+function [CO_ADJ] = COest(SBP,DBP,HR) 
 
 [SBP, SBPlocation] = findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
     % findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
@@ -184,41 +185,3 @@ CO_ADJ = CO_EST / 3.548;
 
 %disp("CO_EST")
 end
-
-%% finding the beginning of a breath
-function [CPks, locs] = BreathDef(CO2)
-
-smoothed_data = smoothdata(CO2(1,:),"movmedian",10);
-%findpeaks(smoothed_data,"MinPeakHeight",38,"MinPeakProminence",2,"MinPeakDistance",2500); % for testing the smoothing only
-diff_smoothed = diff(smoothed_data);
-smooooothed = smoothdata(diff_smoothed,"movmedian",200);
-[~, N] = size(smooooothed);
-
-for P = 1:N
-    if smooooothed(1,P) > 0
-        smooooothed(1,P) = 0;
-    end
-end
-
-smooooothed = -1*smooooothed;
-twoderiv = diff(smooooothed);
-[~, N1] = size(twoderiv);
-
-for P1 = 1:N1
-    if twoderiv(1,P1) < 0
-        twoderiv(1,P1) = 0;
-    end
-end
-
-twoderiv = smoothdata(twoderiv,"movmedian",5);
-[~, locs] = findpeaks(twoderiv,"MinPeakHeight",.0001,"MinPeakProminence",.002,"MinPeakDistance",90);
-
-CPks = CO2(1,locs);
-
-%{
-plot(twoderiv)
-findpeaks(twoderiv,"MinPeakHeight",.0001,"MinPeakProminence",.002,"MinPeakDistance",90);
-%}
-
-end
-

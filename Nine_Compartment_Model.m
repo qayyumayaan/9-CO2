@@ -26,11 +26,6 @@ load(FILE);
 
 CO2Pklocs = ietCO2;
 
-%[etCO2, locs] = BreathDef(CO2);
-%[HR] = heartrate(ECG);
-%[CO_EST] = COest(BP,HR); % L/min, Cardiac output from blood pressure and heart rate
-%CO_EST_ml = CO_EST * 1000; % ml/min
-
 Vv = 4000; % ml, venous blood volume, from cardiac output
 
 V_D = 150; % ml, Anatomical dead space
@@ -83,8 +78,9 @@ for k = 1:9
 end
 
 % numbered equations
-[SV_adj_ml] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
+[SV_adj] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
 %SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
+SV_adj_ml = SV_adj * 1000;
 SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 %HR * PPavg / (SBPavg + DBPavg) 
@@ -147,7 +143,7 @@ PkCO2
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
-function [SV_adj_ml] = SVn_est(SBP,DBP) 
+function [SV_adj] = SVn_est(SBP,DBP) 
 
 SBPavg = sum(SBP)/length(SBP);
 
@@ -157,21 +153,11 @@ PPavg = SBPavg - DBPavg; % Pulse Pressure
 
 SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper.
 SV_adj = SV / 3.548;
-SV_adj_ml = SV_adj * 1000;
 
 end
 
 %% OLD SBP and DBP Calculator (Initial Implementation of the Liljestrand & Zander formula)
-%function [CO_ADJ] = COest(DBP,SBP,HR) 
-function [CO_ADJ] = COest(BP,HR) 
-
-[SBP, SBPlocation] = findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
-    % findpeaks(BP,"MinPeakProminence",20,"MinPeakHeight",110,"MinPeakDistance",10); 
-
-BP_DBP = -1 * BP;
-[negDBPpeaks, DBPlocation] = findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100);
-DBP=-negDBPpeaks;
-% findpeaks(BP_DBP,"MinPeakProminence",15,"MinPeakHeight",-80,"MinPeakDistance",100)
+function [CO_ADJ] = COest(SBP,DBP,HR) 
 
 SBPavg = sum(SBP)/length(SBPlocation);
 
@@ -180,7 +166,6 @@ DBPavg = sum(DBP)/length(DBPlocation);
 PPavg = SBPavg - DBPavg; %Pulse Pressure
 
 CO_EST = HR * PPavg / (SBPavg + DBPavg);
-
 CO_ADJ = CO_EST / 3.548;
 
 %disp("CO_EST")
