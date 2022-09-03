@@ -28,7 +28,7 @@ CO2Pklocs = ietCO2;
 
 Vv = 4000; % ml, venous blood volume, from cardiac output
 V_D = 150; % ml, Anatomical dead space
-VCO2 = 248; % ml min-1
+VCO2 = 248; % ml min-1, exhaled volume of CO2
 VO2n = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
 RQ = .9; % Respiratory quotient, taken from paper. VCO2/VO2
 Va = 1300; % ml, Arterial blood volume

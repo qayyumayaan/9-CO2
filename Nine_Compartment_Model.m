@@ -13,14 +13,14 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
 %load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
 %load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
-load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
-%{
+%load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+
 filterspec = '*.mat';
-Title = 'Pick file generated from the Writing Script:';
-[infile,pathname] = uigetfile(filterspec,Title,"C:\Users\amazi\Downloads\Mentorship\");
+Title = 'Pick file generated from VVA Cleandata:';
+[infile,pathname] = uigetfile(filterspec,Title);
 FILE = append(pathname,infile);
 load(FILE);
-%}
+
 
 %% Variables
 
@@ -33,12 +33,6 @@ VO2n = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
 RQ = .9; % Respiratory quotient, taken from paper. VCO2/VO2
 Va = 1300; % ml, Arterial blood volume
 c = .1316; %/mmHg
-
-%{
-%x = 0;
-%f_x = .53*(1.266-exp(-.0257*x));
-%f_x_1 = -log(1.266 - (x/.53))/.0257;
-%}
 
 CO2vn1 = ones([9 1]); % %, Venous partial CO2 content
 CO2an1 = ones([9 1]); % %, Arterial CO2 content
@@ -64,6 +58,10 @@ w_k = ones([9 1]);
 
 %% Computation
 
+%x = 0;
+%f_x = .53*(1.266-exp(-.0257*x));
+%f_x_1 = -log(1.266 - (x/.53))/.0257;
+
 for k = 1:9
     g_k(k,1) = -.0205 + .0263*k;
 end
@@ -77,13 +75,15 @@ for k = 1:9
 end
 
 % numbered equations
-[SV_adj] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
+
+%[CO_EST_ADJ] = COest(SBP,DBP,HR);
+%CO_ADJ_ml = CO_EST_ADJ * 1000; 
 %SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
+
+[SV_adj] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
 SV_adj_ml = SV_adj * 1000;
 SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
-%HR * PPavg / (SBPavg + DBPavg) 
-%for L = 1:3 % only for testing the first few breaths
 for L = 1:BN
 
 PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
@@ -124,7 +124,7 @@ PETCO2(1,L) = PETCO2n(:,1);
 
 fprintf("Breath %d computed. ",L)
 
-%PkCO2n./PkCO2n1
+%PkCO2n./PkCO2n1 % value details if system is stable. 
 PkCO2n1 = PkCO2n;
 CO2vn1 = CO2vn;
 CO2an1 = CO2an;
@@ -156,16 +156,15 @@ SV_adj = SV / 3.548;
 end
 
 %% OLD SBP and DBP Calculator (Initial Implementation of the Liljestrand & Zander formula)
-function [CO_ADJ] = COest(SBP,DBP,HR) 
+function [CO_EST_ADJ] = COest(SBP,DBP,HR) 
 
-SBPavg = sum(SBP)/length(SBPlocation);
+SBPavg = sum(SBP)/length(SBP);
 
-DBPavg = sum(DBP)/length(DBPlocation);
+DBPavg = sum(DBP)/length(DBP);
 
-PPavg = SBPavg - DBPavg; %Pulse Pressure
+PPavg = SBPavg - DBPavg; % Pulse Pressure
 
 CO_EST = HR * PPavg / (SBPavg + DBPavg);
-CO_ADJ = CO_EST / 3.548;
+CO_EST_ADJ = CO_EST / 3.548;
 
-%disp("CO_EST")
 end
