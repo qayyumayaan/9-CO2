@@ -15,6 +15,16 @@ Written by Ayaan Qayyum 8/23/22. Equations modelled from https://pubmed.ncbi.nlm
 %load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 %load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 
+if ispc
+    Platform = "PC";
+elseif ismac
+    Platform = "MAC";
+elseif isunix
+    Platform = "UNIX";
+end
+
+
+Initials = inputdlg("Please enter your initials.");
 filterspec = '*.mat';
 Title = 'Pick file generated from VVA Cleandata:';
 [infile,pathname] = uigetfile(filterspec,Title);
@@ -139,6 +149,27 @@ PkCO2
 %CO2a 
 %PETCO2
 
+%% Saving
+ANSWER_SAVE = questdlg("Would you like to SAVE?");
+switch ANSWER_SAVE
+    case "Yes"
+        DIR_SAVE = uigetdir(pathname,"Please select a directory to SAVE.");
+        Savefile = erase(infile,".mat");
+        NAME_SAVE = append(Savefile,"_9CO2_",Initials,".mat");
+        disp("Saving in Progress. Please wait a moment.");
+        if Platform == "PC"
+            DIR_NAME_SAVE = append(DIR_SAVE,"\",NAME_SAVE);
+        end
+        if Platform == "MAC"
+            DIR_NAME_SAVE = append(DIR_SAVE,"/",NAME_SAVE);
+        end
+        save(DIR_NAME_SAVE);
+    case "No"
+        return
+end
+
+msgscriptend = append("File saved as ", NAME_SAVE," at ", DIR_SAVE, ". Thank you for using this script! ");
+End = msgbox(msgscriptend);
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
