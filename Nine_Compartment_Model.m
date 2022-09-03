@@ -23,7 +23,9 @@ load(FILE);
 
 %% Variables
 
-[ETCO2, locs] = BreathDef(CO2);
+CO2Pklocs = ietCO2;
+
+%[etCO2, locs] = BreathDef(CO2);
 %[HR] = heartrate(ECG);
 %[CO_EST] = COest(BP,HR); % L/min, Cardiac output from blood pressure and heart rate
 %CO_EST_ml = CO_EST * 1000; % ml/min
@@ -49,7 +51,7 @@ PkCO2n1 = ones([9 1]); % mmHg, Lung compartment k partial CO2 pressure. Necessar
 CO2v = ones([9 1]);
 CO2a = ones([9 1]);
 
-BN = length(locs); % # of breaths
+BN = length(CO2Pklocs); % # of breaths
 NCO2 = zeros([9 BN]);
 PETCO2 = ones([9 BN]);
 PkCO2 = zeros([9 BN]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
@@ -88,7 +90,7 @@ SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 %for L = 1:3
 for L = 1:BN
 
-PETCO2n1 = ETCO2(L); % mmHg, end-tidal partial CO2 pressure
+PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
 
 C = CO2vn1.*SVn; % 2, ml * %
 
@@ -132,7 +134,7 @@ CO2vn1 = CO2vn;
 CO2an1 = CO2an;
  
 
-Trespn = (locs(1,L)-Trespn)/1000; % s, Respiratory interval
+Trespn = (CO2Pklocs(1,L)-Trespn)/1000; % s, Respiratory interval
 
 end
 disp("Finished.")
