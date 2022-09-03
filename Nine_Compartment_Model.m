@@ -183,24 +183,6 @@ CO_ADJ = CO_EST / 3.548;
 %disp("CO_EST")
 end
 
-%% Heart Rate Calculator
-
-function [HR] = heartrate(EKG)
-Sekg = smoothdata(EKG(1,:),"movmedian",30);
-[~, Locs] = findpeaks(Sekg,"MinPeakProminence",20,"MinPeakWidth",10,"MinPeakHeight",100);
-%findpeaks(Sekg,"MinPeakProminence",20,"MinPeakWidth",10,"MinPeakHeight",100)
-o1 = size(Locs,2);
-v = zeros([1 o1-1]);
-
-for o = 1:(o1-1) % makes a set v that contains heart bpm calculated between peak distances. 
-    v(1,Locs(1,o):Locs(1,o+1)) = 1000 * 60 / (Locs(o+1)-Locs(o)); % turns peak distances into bpm from seconds
-end
-
-%[Heart_Rate] = Prominent_Peaks(:,1:(size(Prominent_Peaks,2)-1)); % line is needed for plotting against time bc it makes sure the sets are the same length
-[HR] = v;
-end
-
-
 %% finding the beginning of a breath
 function [CPks, locs] = BreathDef(CO2)
 
