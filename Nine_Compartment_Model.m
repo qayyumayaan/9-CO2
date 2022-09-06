@@ -156,8 +156,12 @@ PkCO2
 
 subplot(1,2,1)
 plot(etCO2)
+hold on
+plot(PETCO2)
 ylabel('End Tidal CO_2 (mmHg)')
 xlabel('breath')
+legend('Real ETCO2','Estimated ETCO2')
+
 subplot(1,2,2)
 plot(PkCO2')
 title('Pressure in 9 compartments')

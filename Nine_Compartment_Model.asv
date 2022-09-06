@@ -37,6 +37,7 @@ FILE = append(pathname,infile);
 load(FILE);
 
 close all
+delete(findall(0));
 
 %% Variables
 
@@ -155,11 +156,15 @@ PkCO2
 
 subplot(1,2,1)
 plot(etCO2)
+hold on
+plot(PETCO2)
 ylabel('End Tidal CO_2 (mmHg)')
 xlabel('breath')
+
 subplot(1,2,2)
 plot(PkCO2')
-ylabel('')
+title('Pressure in 9 compartments')
+ylabel('P_{CO_2} (mmHg)')
 xlabel('breath')
 
 %CO2v 
