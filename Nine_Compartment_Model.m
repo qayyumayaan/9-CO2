@@ -37,6 +37,7 @@ FILE = append(pathname,infile);
 load(FILE);
 
 close all
+delete(findall(0));
 
 %% Variables
 
@@ -102,55 +103,67 @@ SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 for L = 1:BN
 
-PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
+    PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
 
-C = CO2vn1.*SVn; % 2, ml * %
+    C = CO2vn1.*SVn; % 2, ml * %
 
-A = CO2an1.*SVn; % 3, ml * %
+    A = CO2an1.*SVn; % 3, ml * %
 
-B = VO2n.*RQ.*(Trespn/60); % 4, ml, est. CO2 produced per breath
+    B = VO2n.*RQ.*(Trespn/60); % 4, ml, est. CO2 produced per breath
 
-CO2vn = CO2vn1 + (A + B - C) / Vv ; % 1, %
+    CO2vn = CO2vn1 + (A + B - C) / Vv ; % 1, %
 
-D = sum(.53*(1.266-exp(-.0257*PkCO2n1))) .* g_k .* SVn; % 6
+    D = sum(.53*(1.266-exp(-.0257*PkCO2n1))) .* g_k .* SVn; % 6
 
-E = CO2an1.*SVn; % 7, ml * %
+    E = CO2an1.*SVn; % 7, ml * %
 
-CO2an = CO2an1 + (D-E)/Va; % 5, %
+    CO2an = CO2an1 + (D-E)/Va; % 5, %
 
-F = .53*(1.266-exp(-.0257*PkCO2n1)).* w_k .* V_Cap + c .* PkCO2n1 .* w_k .* FRC + c .* PETCO2n1.* w_k.* V_D; % 8
+    F = .53*(1.266-exp(-.0257*PkCO2n1)).* w_k .* V_Cap + c .* PkCO2n1 .* w_k .* FRC + c .* PETCO2n1.* w_k.* V_D; % 8
 
-G = CO2vn1 .* SVn .* g_k; % 9
+    G = CO2vn1 .* SVn .* g_k; % 9
 
-a = .53*(1.266-exp(-.0257*PETCO2n1)) ./ (c * PETCO2n1); % 10
+    a = .53*(1.266-exp(-.0257*PETCO2n1)) ./ (c * PETCO2n1); % 10
 
-b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC + h_k .* V_Tn)); % 11
+    b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC + h_k .* V_Tn)); % 11
 
-CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
+    CO2kn = b.*(F + G) ./ (w_k .* FRC + h_k .* V_Tn); % 12, %
 
-PkCO2n = CO2kn.*c; % mmHg
+    PkCO2n = CO2kn.*c; % mmHg
 
-PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
+    PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
 
-NCO2(:,L) = CO2kn(:,1);
-PkCO2(:,L) = PkCO2n(:,1);
-CO2v(:,L) = CO2vn(:,1);
-CO2a(:,L) = CO2an(:,1);
-PETCO2(1,L) = PETCO2n(:,1);
+    NCO2(:,L) = CO2kn(:,1);
+    PkCO2(:,L) = PkCO2n(:,1);
+    CO2v(:,L) = CO2vn(:,1);
+    CO2a(:,L) = CO2an(:,1);
+    PETCO2(1,L) = PETCO2n(:,1);
 
-fprintf("Breath %d computed. ",L)
+    fprintf("Breath %d computed. ",L)
 
-%PkCO2n./PkCO2n1 % value details if system is stable. 
-PkCO2n1 = PkCO2n;
-CO2vn1 = CO2vn;
-CO2an1 = CO2an;
- 
+    %PkCO2n./PkCO2n1 % value details if system is stable. 
+    PkCO2n1 = PkCO2n;
+    CO2vn1 = CO2vn;
+    CO2an1 = CO2an;
 
-Trespn = (CO2Pklocs(1,L)-Trespn)/1000; % s, Respiratory interval
+
+    Trespn = (CO2Pklocs(1,L)-Trespn)/1000; % s, Respiratory interval
 
 end
 disp("Finished.")
 PkCO2
+
+
+subplot(1,2,1)
+plot(etCO2)
+ylabel('End Tidal CO_2 (mmHg)')
+xlabel('breath')
+subplot(1,2,2)
+plot(PkCO2')
+title('Pressure in 9 compartments')
+ylabel('P_{CO_2} (mmHg)')
+xlabel('breath')
+
 %CO2v 
 %CO2a 
 %PETCO2
@@ -181,27 +194,27 @@ End = msgbox(msgscriptend);
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
 function [SV_adj] = SVn_est(SBP,DBP) 
 
-SBPavg = sum(SBP)/length(SBP);
+    SBPavg = sum(SBP)/length(SBP);
 
-DBPavg = sum(DBP)/length(DBP);
+    DBPavg = sum(DBP)/length(DBP);
 
-PPavg = SBPavg - DBPavg; % Pulse Pressure
+    PPavg = SBPavg - DBPavg; % Pulse Pressure
 
-SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5317099/
-SV_adj = SV / 3.548;
+    SV = (PPavg / (SBPavg + DBPavg)); % mL, Stroke volume per breath, as defined in paper: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5317099/
+    SV_adj = SV / 3.548;
 
 end
 
 %% OLD SBP and DBP Calculator (Initial Implementation of the Liljestrand & Zander formula)
 function [CO_EST_ADJ] = COest(SBP,DBP,HR) 
 
-SBPavg = sum(SBP)/length(SBP);
+    SBPavg = sum(SBP)/length(SBP);
 
-DBPavg = sum(DBP)/length(DBP);
+    DBPavg = sum(DBP)/length(DBP);
 
-PPavg = SBPavg - DBPavg; % Pulse Pressure
+    PPavg = SBPavg - DBPavg; % Pulse Pressure
 
-CO_EST = HR * PPavg / (SBPavg + DBPavg);
-CO_EST_ADJ = CO_EST / 3.548;
+    CO_EST = HR * PPavg / (SBPavg + DBPavg);
+    CO_EST_ADJ = CO_EST / 3.548;
 
 end
