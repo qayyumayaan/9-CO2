@@ -75,9 +75,8 @@ w_k = ones([9 1]);
 
 %% Computation
 
-%x = 0;
-%f_x = .53*(1.266-exp(-.0257*x));
-%f_x_1 = -log(1.266 - (x/.53))/.0257;
+f = @(x) .53*(1.266-exp(-.0257*x));
+%f_inv = -log(1.266 - (x/.53))/.0257;
 
 for k = 1:9
     g_k(k,1) = -.0205 + .0263*k;
@@ -113,17 +112,17 @@ for L = 1:BN
 
     CO2vn = CO2vn1 + (A + B - C) / Vv ; % 1, %
 
-    D = sum(.53*(1.266-exp(-.0257*PkCO2n1))) .* g_k .* SVn; % 6
+    D = f(PkCO2n1) .* g_k .* SVn; % 6
 
     E = CO2an1.*SVn; % 7, ml * %
 
     CO2an = CO2an1 + (D-E)/Va; % 5, %
 
-    F = .53*(1.266-exp(-.0257*PkCO2n1)).* w_k .* V_Cap + c .* PkCO2n1 .* w_k .* FRC + c .* PETCO2n1.* w_k.* V_D; % 8
+    F = f(PkCO2n1).* w_k .* V_Cap + c .* PkCO2n1 .* w_k .* FRC + c .* PETCO2n1.* w_k.* V_D; % 8
 
     G = CO2vn1 .* SVn .* g_k; % 9
 
-    a = .53*(1.266-exp(-.0257*PETCO2n1)) ./ (c * PETCO2n1); % 10
+    a = f(PETCO2n1) ./ (c * PETCO2n1); % 10
 
     b = (w_k .* FRC + h_k .* V_Tn) ./ (a.*((w_k .* V_Cap + g_k .* SVn) + w_k .* FRC + h_k .* V_Tn)); % 11
 
