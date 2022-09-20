@@ -188,6 +188,8 @@ switch ANSWER_SAVE
         save(DIR_NAME_SAVE);
     case "No"
         return
+    case "Cancel"
+        return
 end
 
 msgscriptend = append("File saved as ", NAME_SAVE," at ", DIR_SAVE, ". Thank you for using this script! ");
