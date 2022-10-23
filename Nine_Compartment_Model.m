@@ -150,7 +150,7 @@ for L = 1:BN
 
 end
 disp("Finished.")
-PkCO2
+disp(PkCO2);
 
 
 subplot(1,2,1)
