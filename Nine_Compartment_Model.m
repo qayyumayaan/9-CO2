@@ -3,24 +3,22 @@ close all
 clear
 clc
 
-%{
 
-Written by Ayaan Qayyum 8/23/22 - 9/3/22, 10/23/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
+% Written by Ayaan Qayyum 8/23/22 - 9/3/22, 10/23/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
 
-%}
 
 %% Importing Data
-%load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
-%load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
-%load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
-%load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+% load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
+% load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
+% load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
+% load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
 
 if ispc
-    Platform = "PC";
+    platform = "PC";
 elseif ismac
-    Platform = "MAC";
+    platform = "MAC";
 elseif isunix
-    Platform = "UNIX";
+    platform = "UNIX";
 end
 
 initials = char(inputdlg("Please enter your initials."));
@@ -78,7 +76,7 @@ w_k = ones([9 1]);
 %% Computation
 
 f = @(x) .53*(1.266-exp(-.0257*x));
-%f_inv = @(x) -log(1.266 - (x/.53))/.0257;
+% f_inv = @(x) -log(1.266 - (x/.53))/.0257;
 
 k = 1:9;
 
@@ -91,9 +89,9 @@ w_k(k) = .10055*(1.36708 - exp(-.3393*k));
 
 % numbered equations
 
-%[CO_EST_ADJ] = COest(SBP,DBP,HR);
-%CO_ADJ_ml = CO_EST_ADJ * 1000; 
-%SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
+% [CO_EST_ADJ] = COest(SBP,DBP,HR);
+% CO_ADJ_ml = CO_EST_ADJ * 1000; 
+% SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
 [SV_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
 SV_adj_ml = SV_adj * 1000;
@@ -167,9 +165,9 @@ title('Pressure in 9 compartments')
 ylabel('P_{CO_2} (mmHg)')
 xlabel('breath')
 
-%CO2v 
-%CO2a 
-%PETCO2
+% CO2v 
+% CO2a 
+% PETCO2
 
 %% Saving
 saveResponse = questdlg("Would you like to SAVE?");
@@ -179,10 +177,10 @@ switch saveResponse
         saveFile = erase(infile,".mat");
         saveName = append(saveFile,"_9CO2_",initials,".mat");
         disp("Saving in Progress. Please wait a moment.");
-        if Platform == "PC"
+        if platform == "PC"
             nameSaveDir = append(saveDir,"\",saveName);
         end
-        if Platform == "MAC"
+        if platform == "MAC"
             nameSaveDir = append(saveDir,"/",saveName);
         end
         save(nameSaveDir);
