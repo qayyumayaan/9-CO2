@@ -23,8 +23,8 @@ elseif isunix
     Platform = "UNIX";
 end
 
-initials = char(inputdlg("Please enter your initials."));
-if initials == ""
+Initials = char(inputdlg("Please enter your initials."));
+if Initials == ""
     return
 end
 filterspec = '*.mat';
@@ -76,7 +76,7 @@ w_k = ones([9 1]);
 %% Computation
 
 f = @(x) .53*(1.266-exp(-.0257*x));
-%f_inv = @(x) -log(1.266 - (x/.53))/.0257;
+%f_inv = -log(1.266 - (x/.53))/.0257;
 
 for k = 1:9
     g_k(k,1) = -.0205 + .0263*k;
@@ -90,13 +90,21 @@ for k = 1:9
     w_k(k,1) = .10055*(1.36708 - exp(-.3393*k));
 end
 
+
+k = 1:9;
+g_k(k) = -.0205 + .0263*k;
+
+h_k(k) = .226*(1.102*exp(-.1063*k));
+
+w_k(k) = .10055*(1.36708 - exp(-.3393*k));
+
 % numbered equations
 
 %[CO_EST_ADJ] = COest(SBP,DBP,HR);
 %CO_ADJ_ml = CO_EST_ADJ * 1000; 
 %SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
-[SV_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
+[SV_adj] = SVn_est(SBP,DBP); % mL, Stroke volume per breath.
 SV_adj_ml = SV_adj * 1000;
 SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
@@ -172,30 +180,32 @@ xlabel('breath')
 %PETCO2
 
 %% Saving
-saveResponse = questdlg("Would you like to SAVE?");
-switch saveResponse
+ANSWER_SAVE = questdlg("Would you like to SAVE?");
+switch ANSWER_SAVE
     case "Yes"
-        saveDir = uigetdir(pathname,"Please select a directory to SAVE.");
-        saveFile = erase(infile,".mat");
-        saveName = append(saveFile,"_9CO2_",initials,".mat");
+        DIR_SAVE = uigetdir(pathname,"Please select a directory to SAVE.");
+        Savefile = erase(infile,".mat");
+        NAME_SAVE = append(Savefile,"_9CO2_",Initials,".mat");
         disp("Saving in Progress. Please wait a moment.");
         if Platform == "PC"
-            nameSaveDir = append(saveDir,"\",saveName);
+            DIR_NAME_SAVE = append(DIR_SAVE,"\",NAME_SAVE);
         end
         if Platform == "MAC"
-            nameSaveDir = append(saveDir,"/",saveName);
+            DIR_NAME_SAVE = append(DIR_SAVE,"/",NAME_SAVE);
         end
-        save(nameSaveDir);
-    otherwise
+        save(DIR_NAME_SAVE);
+    case "No"
+        return
+    case "Cancel"
         return
 end
 
-msgscriptend = append("File saved as ", saveName," at ", saveDir, ". Thank you for using this script! ");
+msgscriptend = append("File saved as ", NAME_SAVE," at ", DIR_SAVE, ". Thank you for using this script! ");
 End = msgbox(msgscriptend);
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
-function [SV_adj] = SVnEst(SBP,DBP) 
+function [SV_adj] = SVn_est(SBP,DBP) 
 
     SBPavg = sum(SBP)/length(SBP);
 
