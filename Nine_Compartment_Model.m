@@ -5,7 +5,7 @@ clc
 
 %{
 
-Written by Ayaan Qayyum 8/23/22 - 9/3/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
+Written by Ayaan Qayyum 8/23/22 - 9/3/22, 10/23/22. Equations modelled from https://pubmed.ncbi.nlm.nih.gov/14608002/
 
 %}
 
@@ -33,8 +33,8 @@ Title = 'Pick file generated from VVA Cleandata:';
 if pathname == 0
     return
 end
-FILE = append(pathname,infile);
-load(FILE);
+file = append(pathname,infile);
+load(file);
 
 close all
 delete(findall(0));
@@ -62,11 +62,13 @@ NCO2 = zeros([9 BN]);
 PETCO2 = ones([1 BN]);
 PkCO2 = zeros([9 BN]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
 
-Trespn = 0; % s, Respiratory interval. See line ~129. 
+Trespn = 0; % s, Respiratory interval. See line ~148. 
 
-V_Tn = 700*[4.58; 6.63; 8.48; 10.13; 11.62; 12.96; 14.17; 15.25; 16.22]/100; % ml, Tidal volume. was just .5
-FRC = 3000*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % mL Functional residual capacity. was just 3
-V_Cap = 200*[6.58; 8.64; 10.11; 11.16; 11.90; 12.43; 12.81; 13.08; 13.27]/100; % ml, Lung capillary blood volume. was just 75
+defFRCV_Cap = [6.58, 8.64, 10.11, 11.16, 11.90, 12.43, 12.81, 13.08, 13.27]';
+
+V_Tn = 700*[4.58, 6.63, 8.48, 10.13, 11.62, 12.96, 14.17, 15.25, 16.22]'/100; % ml, Tidal volume. was just .5
+FRC = 3000*defFRCV_Cap/100; % mL Functional residual capacity. was just 3
+V_Cap = 200*defFRCV_Cap/100; % ml, Lung capillary blood volume. was just 75
 
 g_k = ones([9 1]);
 h_k = ones([9 1]);
@@ -129,11 +131,12 @@ for L = 1:BN
 
     PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
 
-    NCO2(:,L) = CO2kn(:,1);
-    PkCO2(:,L) = PkCO2n(:,1);
-    CO2v(:,L) = CO2vn(:,1);
-    CO2a(:,L) = CO2an(:,1);
-    PETCO2(1,L) = PETCO2n(:,1);
+    % variables indexed to save per loop
+    NCO2(:,L) = CO2kn(:);
+    PkCO2(:,L) = PkCO2n(:);
+    CO2v(:,L) = CO2vn(:);
+    CO2a(:,L) = CO2an(:);
+    PETCO2(:,L) = PETCO2n(:);
 
     fprintf("Breath %d computed. ",L)
 
