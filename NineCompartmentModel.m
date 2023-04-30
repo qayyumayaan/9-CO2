@@ -41,12 +41,12 @@ close all
 
 CO2Pklocs = ietCO2;
 
-VenousBloodVolume = 4000; % ml, venous blood volume, from cardiac output
-anatomicDeadSpaceVol = 150; % ml, Anatomical dead space
+VenousBloodVol = 4000; % ml
+anatomicDeadSpaceVol = 150; % ml
 VCO2 = 248; % ml min-1, exhaled volume of CO2
-VO2n = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
-RQ = .9; % Respiratory quotient, taken from paper. VCO2/VO2
-Va = 1300; % ml, Arterial blood volume
+pulmonaryO2Uptake = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
+respiratoryQuotient = .9; % Respiratory quotient, taken from paper. VCO2/VO2
+arterialBloodVol = 1300; % ml, Arterial blood volume
 c = .1316; %/mmHg
 
 venousPartialCO2 = ones([9 1]); % %, Venous partial CO2 content
@@ -105,15 +105,15 @@ for L = 1:numBreaths
 
     A = arterialCO2.*SVn; % 3, ml * %
 
-    B = VO2n.*RQ.*(respiratoryInterval/60); % 4, ml, est. CO2 produced per breath
+    B = pulmonaryO2Uptake.*respiratoryQuotient.*(respiratoryInterval/60); % 4, ml, est. CO2 produced per breath
 
-    CO2vn = venousPartialCO2 + (A + B - C) / VenousBloodVolume ; % 1, %
+    CO2vn = venousPartialCO2 + (A + B - C) / VenousBloodVol ; % 1, %
 
     D = f(partialCO2PressurePerCompartment) .* g_k .* SVn; % 6
 
     E = arterialCO2.*SVn; % 7, ml * %
 
-    CO2an = arterialCO2 + (D-E)/Va; % 5, %
+    CO2an = arterialCO2 + (D-E)/arterialBloodVol; % 5, %
 
     F = f(partialCO2PressurePerCompartment).* w_k .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* w_k .* functionalResidualCapacity + c .* PETCO2n1.* w_k.* anatomicDeadSpaceVol; % 8
 
