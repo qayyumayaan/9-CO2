@@ -35,7 +35,7 @@ file = append(pathname,infile);
 load(file);
 
 close all
-delete(findall(0));
+% delete(findall(0));
 
 %% Variables
 
@@ -180,7 +180,7 @@ switch saveResponse
         if platform == "PC"
             nameSaveDir = append(saveDir,"\",saveName);
         end
-        if platform == "MAC"
+        if platform == "MAC" || platform == "UNIX"
             nameSaveDir = append(saveDir,"/",saveName);
         end
         save(nameSaveDir);
