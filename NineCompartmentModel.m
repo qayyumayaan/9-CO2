@@ -57,7 +57,7 @@ CO2a = ones([9 1]);
 
 numBreaths = length(CO2Pklocs);
 NCO2 = zeros([9 numBreaths]);
-PETCO2 = ones([1 numBreaths]);
+estETCO2 = ones([1 numBreaths]);
 lungCompartmentPartialCO2 = zeros([9 numBreaths]); % mmHg, per compartment k. Necessary output!
 
 defFRCV_Cap = [6.58, 8.64, 10.11, 11.16, 11.90, 12.43, 12.81, 13.08, 13.27]';
@@ -77,10 +77,10 @@ f = @(x) .53*(1.266-exp(-.0257*x));
 % f_inv = @(x) -log(1.266 - (x/.53))/.0257;
 
 k = 1:9;
+g_k(k) = (.0263*k -.0205); % in the upright position
 
 h_k(k) = .226*(1.102*exp(-.1063*k)); % in the upright position
 
-w_k(k) = .10055*(1.36708 - exp(-.3393*k));
 weightFunction(k) = .10055*(1.36708 - exp(-.3393*k));
 
 respiratoryInterval = 0; % used in CO2ProducedPerBreath
@@ -97,7 +97,7 @@ StrokeVolPerBreath = StrokeVolPerBreath_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 1
 
 for L = 1:numBreaths
 
-    PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
+    estETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
 
     C = venousPartialCO2.*StrokeVolPerBreath; % 2, ml * %
 
@@ -113,11 +113,11 @@ for L = 1:numBreaths
 
     CO2an = arterialCO2 + (D-E)/arterialBloodVol; % 5, %
 
-    F = f(partialCO2PressurePerCompartment).* weightFunction .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* weightFunction .* functionalResidualCapacity + c .* PETCO2n1.* weightFunction.* anatomicDeadSpaceVol; % 8
+    F = f(partialCO2PressurePerCompartment).* weightFunction .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* weightFunction .* functionalResidualCapacity + c .* estETCO2n1.* weightFunction.* anatomicDeadSpaceVol; % 8
 
     G = venousPartialCO2 .* StrokeVolPerBreath .* g_k; % 9
 
-    a = f(PETCO2n1) ./ (c * PETCO2n1); % 10
+    a = f(estETCO2n1) ./ (c * estETCO2n1); % 10
 
     b = (weightFunction .* functionalResidualCapacity + h_k .* tidalVol) ./ (a.*((weightFunction .* lungCapillaryBloodVol + g_k .* StrokeVolPerBreath) + weightFunction .* functionalResidualCapacity + h_k .* tidalVol)); % 11
 
@@ -125,14 +125,14 @@ for L = 1:numBreaths
 
     PkCO2n = CO2kn.*c; % mmHg
 
-    PETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
+    estETCO2n = sum(PkCO2n)*sum(h_k); % 13, mmHg
 
     % variables indexed to save per loop
     NCO2(:,L) = CO2kn(:);
     lungCompartmentPartialCO2(:,L) = PkCO2n(:);
     CO2v(:,L) = CO2vn(:);
     CO2a(:,L) = CO2an(:);
-    PETCO2(:,L) = PETCO2n(:);
+    estETCO2(:,L) = estETCO2n(:);
 
     fprintf("Breath %d computed. ",L)
 
@@ -151,7 +151,7 @@ disp(lungCompartmentPartialCO2);
 subplot(1,2,1)
 plot(etCO2)
 hold on
-plot(PETCO2)
+plot(estETCO2)
 ylabel('End Tidal CO_2 (mmHg)')
 xlabel('breath')
 legend('Real ETCO2','Estimated ETCO2')
@@ -164,7 +164,7 @@ xlabel('breath')
 
 % CO2v 
 % CO2a 
-% PETCO2
+% estETCO2
 
 %% Saving
 saveResponse = questdlg("Would you like to SAVE?");
