@@ -44,33 +44,31 @@ CO2Pklocs = ietCO2;
 VenousBloodVol = 4000; % ml
 anatomicDeadSpaceVol = 150; % ml
 VCO2 = 248; % ml min-1, exhaled volume of CO2
-pulmonaryO2Uptake = 263; % ml min-1, Pulmonary O2 Uptake. Q * (ConcO2art - ConcO2ven)
-respiratoryQuotient = .9; % Respiratory quotient, taken from paper. VCO2/VO2
-arterialBloodVol = 1300; % ml, Arterial blood volume
+pulmonaryO2Uptake = 263; % ml min-1 
+respiratoryQuotient = .9; % unitless, from paper. VCO2/VO2
+arterialBloodVol = 1300; % ml
 c = .1316; %/mmHg
 
-venousPartialCO2 = ones([9 1]); % %, Venous partial CO2 content
-arterialCO2 = ones([9 1]); % %, Arterial CO2 content
+venousPartialCO2 = ones([9 1]);
+arterialCO2 = ones([9 1]);
 partialCO2PressurePerCompartment = ones([9 1]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
 CO2v = ones([9 1]);
 CO2a = ones([9 1]);
 
-numBreaths = length(CO2Pklocs); % # of breaths
+numBreaths = length(CO2Pklocs);
 NCO2 = zeros([9 numBreaths]);
 PETCO2 = ones([1 numBreaths]);
-lungCompPartialCO2 = zeros([9 numBreaths]); % mmHg, Lung compartment k partial CO2 pressure. Necessary output!
-
-respiratoryInterval = 0; % s, Respiratory interval. See line ~148. 
+lungCompartmentPartialCO2 = zeros([9 numBreaths]); % mmHg, per compartment k. Necessary output!
 
 defFRCV_Cap = [6.58, 8.64, 10.11, 11.16, 11.90, 12.43, 12.81, 13.08, 13.27]';
 
-tidalVol = 700*[4.58, 6.63, 8.48, 10.13, 11.62, 12.96, 14.17, 15.25, 16.22]'/100; % ml, Tidal volume. was just .5
-functionalResidualCapacity = 3000*defFRCV_Cap/100; % mL Functional residual capacity. was just 3
-lungCapillaryBloodVol = 200*defFRCV_Cap/100; % ml, Lung capillary blood volume. was just 75
+tidalVol = 700*[4.58, 6.63, 8.48, 10.13, 11.62, 12.96, 14.17, 15.25, 16.22]'/100; % ml
+functionalResidualCapacity = 3000*defFRCV_Cap/100; % ml
+lungCapillaryBloodVol = 200*defFRCV_Cap/100; % ml
 
 g_k = ones([9 1]);
 h_k = ones([9 1]);
-w_k = ones([9 1]);
+weightFunction = ones([9 1]);
 
 
 %% Computation
@@ -80,12 +78,12 @@ f = @(x) .53*(1.266-exp(-.0257*x));
 
 k = 1:9;
 
-g_k(k) = -.0205 + .0263*k;
-
-h_k(k) = .226*(1.102*exp(-.1063*k));
+h_k(k) = .226*(1.102*exp(-.1063*k)); % in the upright position
 
 w_k(k) = .10055*(1.36708 - exp(-.3393*k));
+weightFunction(k) = .10055*(1.36708 - exp(-.3393*k));
 
+respiratoryInterval = 0; % used in CO2ProducedPerBreath
 
 % numbered equations
 
@@ -93,37 +91,37 @@ w_k(k) = .10055*(1.36708 - exp(-.3393*k));
 % CO_ADJ_ml = CO_EST_ADJ * 1000; 
 % SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
-[SV_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
-SV_adj_ml = SV_adj * 1000;
-SVn = SV_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
+[StrokeVolPerBreath_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
+StrokeVolPerBreath_adj_ml = StrokeVolPerBreath_adj * 1000;
+StrokeVolPerBreath = StrokeVolPerBreath_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 for L = 1:numBreaths
 
     PETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
 
-    C = venousPartialCO2.*SVn; % 2, ml * %
+    C = venousPartialCO2.*StrokeVolPerBreath; % 2, ml * %
 
-    A = arterialCO2.*SVn; % 3, ml * %
+    A = arterialCO2.*StrokeVolPerBreath; % 3, ml * %
 
-    B = pulmonaryO2Uptake.*respiratoryQuotient.*(respiratoryInterval/60); % 4, ml, est. CO2 produced per breath
+    CO2ProducedPerBreath = pulmonaryO2Uptake.*respiratoryQuotient.*(respiratoryInterval/60); % 4, ml, est. CO2 produced per breath
 
-    CO2vn = venousPartialCO2 + (A + B - C) / VenousBloodVol ; % 1, %
+    CO2vn = venousPartialCO2 + (A + CO2ProducedPerBreath - C) / VenousBloodVol ; % 1, %
 
-    D = f(partialCO2PressurePerCompartment) .* g_k .* SVn; % 6
+    D = f(partialCO2PressurePerCompartment) .* g_k .* StrokeVolPerBreath; % 6
 
-    E = arterialCO2.*SVn; % 7, ml * %
+    E = arterialCO2.*StrokeVolPerBreath; % 7, ml * %
 
     CO2an = arterialCO2 + (D-E)/arterialBloodVol; % 5, %
 
-    F = f(partialCO2PressurePerCompartment).* w_k .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* w_k .* functionalResidualCapacity + c .* PETCO2n1.* w_k.* anatomicDeadSpaceVol; % 8
+    F = f(partialCO2PressurePerCompartment).* weightFunction .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* weightFunction .* functionalResidualCapacity + c .* PETCO2n1.* weightFunction.* anatomicDeadSpaceVol; % 8
 
-    G = venousPartialCO2 .* SVn .* g_k; % 9
+    G = venousPartialCO2 .* StrokeVolPerBreath .* g_k; % 9
 
     a = f(PETCO2n1) ./ (c * PETCO2n1); % 10
 
-    b = (w_k .* functionalResidualCapacity + h_k .* tidalVol) ./ (a.*((w_k .* lungCapillaryBloodVol + g_k .* SVn) + w_k .* functionalResidualCapacity + h_k .* tidalVol)); % 11
+    b = (weightFunction .* functionalResidualCapacity + h_k .* tidalVol) ./ (a.*((weightFunction .* lungCapillaryBloodVol + g_k .* StrokeVolPerBreath) + weightFunction .* functionalResidualCapacity + h_k .* tidalVol)); % 11
 
-    CO2kn = b.*(F + G) ./ (w_k .* functionalResidualCapacity + h_k .* tidalVol); % 12, %
+    CO2kn = b.*(F + G) ./ (weightFunction .* functionalResidualCapacity + h_k .* tidalVol); % 12, %
 
     PkCO2n = CO2kn.*c; % mmHg
 
@@ -131,7 +129,7 @@ for L = 1:numBreaths
 
     % variables indexed to save per loop
     NCO2(:,L) = CO2kn(:);
-    lungCompPartialCO2(:,L) = PkCO2n(:);
+    lungCompartmentPartialCO2(:,L) = PkCO2n(:);
     CO2v(:,L) = CO2vn(:);
     CO2a(:,L) = CO2an(:);
     PETCO2(:,L) = PETCO2n(:);
@@ -143,12 +141,11 @@ for L = 1:numBreaths
     venousPartialCO2 = CO2vn;
     arterialCO2 = CO2an;
 
-
-    respiratoryInterval = (CO2Pklocs(1,L)-respiratoryInterval)/1000; % s, Respiratory interval
+    respiratoryInterval = (CO2Pklocs(1,L)-respiratoryInterval)/1000; % s
 
 end
 disp("Finished.")
-disp(lungCompPartialCO2);
+disp(lungCompartmentPartialCO2);
 
 
 subplot(1,2,1)
@@ -160,7 +157,7 @@ xlabel('breath')
 legend('Real ETCO2','Estimated ETCO2')
 
 subplot(1,2,2)
-plot(lungCompPartialCO2')
+plot(lungCompartmentPartialCO2')
 title('Pressure in 9 compartments')
 ylabel('P_{CO_2} (mmHg)')
 xlabel('breath')
