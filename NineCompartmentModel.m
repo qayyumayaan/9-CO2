@@ -86,7 +86,7 @@ respiratoryInterval = 0; % used in CO2ProducedPerBreath
 % CO_ADJ_ml = CO_EST_ADJ * 1000; 
 % SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
-[StrokeVolPerBreath_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
+[StrokeVolPerBreath_adj] = strokeVolumeEstimated(SBP,DBP); % mL, Stroke volume per breath.
 StrokeVolPerBreath_adj_ml = StrokeVolPerBreath_adj * 1000;
 StrokeVolPerBreath = StrokeVolPerBreath_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
@@ -147,6 +147,8 @@ subplot(1,2,1)
 plot(etCO2)
 hold on
 plot(estETCO2)
+hold on
+plot(etCO2 - estETCO2)
 ylabel('End Tidal CO_2 (mmHg)')
 xlabel('breath')
 legend('Real ETCO2','Estimated ETCO2')
@@ -185,7 +187,7 @@ End = msgbox(msgscriptend);
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
-function [SV_adj] = SVnEst(SBP,DBP) 
+function [SV_adj] = strokeVolumeEstimated(SBP,DBP) 
 
     SBPavg = sum(SBP)/length(SBP);
 

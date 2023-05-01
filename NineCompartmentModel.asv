@@ -8,11 +8,6 @@ clc
 
 
 %% Importing Data
-% load("/Users/qayyuma/Documents/9 CO2/VVA001_v3.mat")
-% load("C:\Users\amazi\Documents\GitHub\9-CO2\VVA001_v3.mat");
-% load("C:\Users\amazi\Downloads\Mentorship\VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
-% load("/Users/qayyuma/Downloads/VVA014  Template 2022 Labchart 8 V8 RollTilt TRANS0.18VS_clean.mat");
-
 if ispc
     platform = "PC";
 elseif ismac
@@ -47,7 +42,7 @@ VCO2 = 248; % ml min-1, exhaled volume of CO2
 pulmonaryO2Uptake = 263; % ml min-1 
 respiratoryQuotient = .9; % unitless, from paper. VCO2/VO2
 arterialBloodVol = 1300; % ml
-c = .1316; %/mmHg
+c = .1316; % mmHg
 
 venousPartialCO2 = ones([9 1]);
 arterialCO2 = ones([9 1]);
@@ -60,10 +55,10 @@ NCO2 = zeros([9 numBreaths]);
 estETCO2 = ones([1 numBreaths]);
 lungCompartmentPartialCO2 = zeros([9 numBreaths]); % mmHg, per compartment k. Necessary output!
 
-alveolarVolFRC = [6.58, 8.64, 10.11, 11.16, 11.90, 12.43, 12.81, 13.08, 13.27]';
+alveolarVolFRC = [6.58, 8.64, 10.11, 11.16, 11.90, 12.43, 12.81, 13.08, 13.27]'; % Alveolar vol. (% FRCk) while standing
 
 tidalVol = 700*[4.58, 6.63, 8.48, 10.13, 11.62, 12.96, 14.17, 15.25, 16.22]'/100; % ml
-functionalResidualCapacity = 3000*alveolarVolFRC/100; % ml
+functionalResidualCapacity = 3000*alveolarVolFRC/100; % ml 
 lungCapillaryBloodVol = 200*alveolarVolFRC/100; % ml
 
 g_k = ones([9 1]);
@@ -91,13 +86,13 @@ respiratoryInterval = 0; % used in CO2ProducedPerBreath
 % CO_ADJ_ml = CO_EST_ADJ * 1000; 
 % SVn = (mean(CO_EST_ml)./mean(HR)).*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100; % mL, Stroke volume per breath.
 
-[StrokeVolPerBreath_adj] = SVnEst(SBP,DBP); % mL, Stroke volume per breath.
+[StrokeVolPerBreath_adj] = strokeVolumeEstimated(SBP,DBP); % mL, Stroke volume per breath.
 StrokeVolPerBreath_adj_ml = StrokeVolPerBreath_adj * 1000;
 StrokeVolPerBreath = StrokeVolPerBreath_adj_ml.*[.58; 3.21; 5.84; 8.47; 11.10; 13.73; 16.36; 18.99; 21.62]/100;
 
 for L = 1:numBreaths
 
-    estETCO2n1 = etCO2(L); % mmHg, end-tidal partial CO2 pressure
+    estETCO2inBreath = etCO2(L); % mmHg, end-tidal partial CO2 pressure
 
     C = venousPartialCO2.*StrokeVolPerBreath; % 2, ml * %
 
@@ -113,11 +108,11 @@ for L = 1:numBreaths
 
     CO2an = arterialCO2 + (D-E)/arterialBloodVol; % 5, %
 
-    F = f(partialCO2PressurePerCompartment).* weightFunction .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* weightFunction .* functionalResidualCapacity + c .* estETCO2n1.* weightFunction.* anatomicDeadSpaceVol; % 8
+    F = f(partialCO2PressurePerCompartment).* weightFunction .* lungCapillaryBloodVol + c .* partialCO2PressurePerCompartment .* weightFunction .* functionalResidualCapacity + c .* estETCO2inBreath.* weightFunction.* anatomicDeadSpaceVol; % 8
 
     G = venousPartialCO2 .* StrokeVolPerBreath .* g_k; % 9
 
-    a = f(estETCO2n1) ./ (c * estETCO2n1); % 10
+    a = f(estETCO2inBreath) ./ (c * estETCO2inBreath); % 10
 
     b = (weightFunction .* functionalResidualCapacity + h_k .* tidalVol) ./ (a.*((weightFunction .* lungCapillaryBloodVol + g_k .* StrokeVolPerBreath) + weightFunction .* functionalResidualCapacity + h_k .* tidalVol)); % 11
 
@@ -152,6 +147,8 @@ subplot(1,2,1)
 plot(etCO2)
 hold on
 plot(estETCO2)
+hold on
+plot(etCO2 - estETCO2)
 ylabel('End Tidal CO_2 (mmHg)')
 xlabel('breath')
 legend('Real ETCO2','Estimated ETCO2')
@@ -190,7 +187,7 @@ End = msgbox(msgscriptend);
 
 % End Tidal CO2 records the CO2 output. One breath is from one defined peak to another.
 %% SV Approximation via the Liljestrand & Zander formula, irrespective of Heart Rate. 
-function [SV_adj] = SVnEst(SBP,DBP) 
+function [SV_adj] = strokeVolumeEstimated(SBP,DBP) 
 
     SBPavg = sum(SBP)/length(SBP);
 
